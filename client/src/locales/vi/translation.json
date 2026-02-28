@@ -1,0 +1,27 @@
+{
+    "navbar": {
+        "home": "Trang Chủ",
+        "news": "Tin Tức",
+        "statement": "Sao Kê",
+        "donate": "Quyên Góp",
+        "map": "Bản Đồ",
+        "volunteer": "Tình Nguyện",
+        "admin": "Quản Trị",
+        "logout": "Đăng Xuất",
+        "login": "Đăng Nhập",
+        "hello": "Chào"
+    },
+    "home": {
+        "title": "Hệ Thống Quản Lý Cứu Trợ Thiên Tai",
+        "subtitle": "Kết nối trái tim, chia sẻ yêu thương. Cùng chung tay giúp đỡ đồng bào gặp khó khăn.",
+        "donate_now": "Quyên Góp Ngay",
+        "register_volunteer": "Đăng Ký Tình Nguyện",
+        "stats_campaigns": "Chiến dịch đang gọi",
+        "stats_donated": "Tổng tiền quyên góp",
+        "stats_volunteers": "Tình nguyện viên",
+        "latest_campaigns": "Chiến Dịch Mới Nhất",
+        "view_all": "Xem tất cả",
+        "raised": "Đã quyên góp",
+        "goal": "Mục tiêu"
+    }
+}

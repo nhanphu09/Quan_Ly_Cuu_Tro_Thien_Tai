@@ -1,0 +1,27 @@
+{
+    "navbar": {
+        "home": "Home",
+        "news": "News",
+        "statement": "Statement",
+        "donate": "Donate",
+        "map": "Map",
+        "volunteer": "Volunteer",
+        "admin": "Admin",
+        "logout": "Logout",
+        "login": "Login",
+        "hello": "Hello"
+    },
+    "home": {
+        "title": "Disaster Relief System",
+        "subtitle": "Connecting hearts, sharing love. Together we help those in need.",
+        "donate_now": "Donate Now",
+        "register_volunteer": "Register Volunteer",
+        "stats_campaigns": "Active Campaigns",
+        "stats_donated": "Total Donated",
+        "stats_volunteers": "Volunteers",
+        "latest_campaigns": "Latest Campaigns",
+        "view_all": "View All",
+        "raised": "Raised",
+        "goal": "Goal"
+    }
+}
