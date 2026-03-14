@@ -884,8 +884,8 @@ ul {
 
 .admin-sidebar {
   width: 250px;
-  background-color: var(--text-color);
-  color: var(--white);
+  background-color: hsl(220, 39%, 10%); /* Always keep a dark background */
+  color: #ffffff; /* Always keep white text */
   display: flex;
   flex-direction: column;
 }
@@ -906,11 +906,12 @@ ul {
   display: block;
   width: 100%;
   padding: 1rem 1.5rem;
-  color: #ccc;
+  color: #f1f5f9; /* changed from #ccc to brighter light gray */
   background: none;
   border: none;
   text-align: left;
   font-size: 1rem;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -918,8 +919,9 @@ ul {
 .admin-nav-link:hover,
 .admin-nav-link.active {
   color: var(--white);
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.15);
   border-left: 4px solid var(--primary-color);
+  font-weight: 600;
 }
 
 .admin-content {
