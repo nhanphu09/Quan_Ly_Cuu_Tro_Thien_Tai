@@ -3,6 +3,7 @@ const router = express.Router();
 const { Campaign, Donation, Volunteer, ReliefRequest, InventoryItem, DisasterReport, News, Comment, User, Expense, CampaignUpdate } = require('../models');
 const { verifyToken, isAdmin } = require('../middleware/auth');
 const nodemailer = require('nodemailer');
+const bcrypt = require('bcryptjs');
 
 // Setup mock email transporter
 const transporter = nodemailer.createTransport({
@@ -429,6 +430,131 @@ router.put('/volunteers/:id', verifyToken, isAdmin, async (req, res) => {
 
         await volunteer.save();
         res.json(volunteer);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ==========================================
+// NEW FEATURES FOR 5-MODULE ARCHITECTURE
+// ==========================================
+
+// User Management (Admin)
+router.get('/users', verifyToken, isAdmin, async (req, res) => {
+    try {
+        const users = await User.findAll({ attributes: { exclude: ['password'] } });
+        res.json(users);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+router.post('/users', verifyToken, isAdmin, async (req, res) => {
+    try {
+        const { username, password, role } = req.body;
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = await User.create({
+            username,
+            password: hashedPassword,
+            role: role || 'user'
+        });
+        const userToReturn = newUser.toJSON();
+        delete userToReturn.password;
+        res.status(201).json(userToReturn);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+router.put('/users/:id', verifyToken, isAdmin, async (req, res) => {
+    try {
+        const { role } = req.body;
+        const user = await User.findByPk(req.params.id);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        user.role = role !== undefined ? role : user.role;
+        await user.save();
+
+        const userToReturn = user.toJSON();
+        delete userToReturn.password;
+        res.json(userToReturn);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+router.delete('/users/:id', verifyToken, isAdmin, async (req, res) => {
+    try {
+        const user = await User.findByPk(req.params.id);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        await user.destroy();
+        res.json({ message: 'User deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Update Campaign
+router.put('/campaigns/:id', verifyToken, isAdmin, async (req, res) => {
+    try {
+        const campaign = await Campaign.findByPk(req.params.id);
+        if (!campaign) return res.status(404).json({ error: 'Campaign not found' });
+
+        await campaign.update(req.body);
+        res.json(campaign);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+router.delete('/campaigns/:id', verifyToken, isAdmin, async (req, res) => {
+    try {
+        const campaign = await Campaign.findByPk(req.params.id);
+        if (!campaign) return res.status(404).json({ error: 'Campaign not found' });
+
+        await campaign.destroy();
+        res.json({ message: 'Campaign deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Update Inventory Item
+router.put('/inventory/:id', verifyToken, isAdmin, async (req, res) => {
+    try {
+        const item = await InventoryItem.findByPk(req.params.id);
+        if (!item) return res.status(404).json({ error: 'Item not found' });
+
+        await item.update(req.body);
+        res.json(item);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+router.delete('/inventory/:id', verifyToken, isAdmin, async (req, res) => {
+    try {
+        const item = await InventoryItem.findByPk(req.params.id);
+        if (!item) return res.status(404).json({ error: 'Item not found' });
+
+        await item.destroy();
+        res.json({ message: 'Item deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Update Donation Status
+router.put('/donations/:id/status', verifyToken, isAdmin, async (req, res) => {
+    try {
+        const { status } = req.body;
+        const donation = await Donation.findByPk(req.params.id);
+        if (!donation) return res.status(404).json({ error: 'Donation not found' });
+
+        donation.status = status;
+        await donation.save();
+        res.json(donation);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

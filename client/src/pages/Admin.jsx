@@ -23,13 +23,15 @@ const Admin = () => {
     const [expenses, setExpenses] = useState([]);
     const [expenseForm, setExpenseForm] = useState({ title: '', amount: '', description: '' });
     const [inventoryForm, setInventoryForm] = useState({ name: '', quantity: '', unit: 'kg', lat: '', lng: '' });
+    const [users, setUsers] = useState([]);
+    const [userForm, setUserForm] = useState({ username: '', password: '', role: 'user' });
     const { token, logout } = useContext(AuthContext);
     const navigate = useNavigate();
 
     const fetchDashboardData = async () => {
         try {
             const config = { headers: { Authorization: `Bearer ${token}` } };
-            const [campRes, donRes, volRes, reqRes, invRes, sumRes, newsRes, expRes] = await Promise.all([
+            const [campRes, donRes, volRes, reqRes, invRes, sumRes, newsRes, expRes, userRes] = await Promise.all([
                 axios.get('http://localhost:5001/api/campaigns', config),
                 axios.get('http://localhost:5001/api/donations', config),
                 axios.get('http://localhost:5001/api/volunteers', config),
@@ -37,7 +39,8 @@ const Admin = () => {
                 axios.get('http://localhost:5001/api/inventory', config),
                 axios.get('http://localhost:5001/api/dashboard/summary', config),
                 axios.get('http://localhost:5001/api/news'),
-                axios.get('http://localhost:5001/api/expenses', config)
+                axios.get('http://localhost:5001/api/expenses', config),
+                axios.get('http://localhost:5001/api/users', config)
             ]);
             setCampaigns(campRes.data);
             setDonations(donRes.data);
@@ -47,6 +50,7 @@ const Admin = () => {
             setSummary(sumRes.data);
             setNewsList(newsRes.data);
             setExpenses(expRes.data);
+            setUsers(userRes.data);
         } catch (error) {
             console.error('Error fetching admin data:', error);
             if (error.response?.status === 401 || error.response?.status === 403) {
@@ -125,6 +129,71 @@ const Admin = () => {
         }
     };
 
+    const handleUserSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            await axios.post('http://localhost:5001/api/users', userForm, { headers: { Authorization: `Bearer ${token}` } });
+            setUserForm({ username: '', password: '', role: 'user' });
+            fetchDashboardData();
+            toast.success('Thêm người dùng thành công!');
+        } catch (error) {
+            toast.error('Lỗi thêm người dùng!');
+        }
+    };
+
+    const handleDeleteUser = async (id) => {
+        if (!window.confirm('Xác nhận xóa người dùng này?')) return;
+        try {
+            await axios.delete(`http://localhost:5001/api/users/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+            fetchDashboardData();
+            toast.success('Đã xóa người dùng!');
+        } catch (error) {
+            toast.error('Lỗi xóa người dùng');
+        }
+    };
+
+    const handleRoleChange = async (id, role) => {
+        try {
+            await axios.put(`http://localhost:5001/api/users/${id}`, { role }, { headers: { Authorization: `Bearer ${token}` } });
+            fetchDashboardData();
+            toast.success('Cập nhật quyền thành công!');
+        } catch (error) {
+            toast.error('Lỗi cập nhật quyền');
+        }
+    };
+
+    const handleDeleteCampaign = async (id) => {
+        if (!window.confirm('Xác nhận xóa chiến dịch này?')) return;
+        try {
+            await axios.delete(`http://localhost:5001/api/campaigns/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+            fetchDashboardData();
+            toast.success('Đã xóa chiến dịch!');
+        } catch (error) {
+            toast.error('Lỗi xóa chiến dịch');
+        }
+    };
+
+    const handleDeleteInventory = async (id) => {
+        if (!window.confirm('Xác nhận xóa lô hàng này?')) return;
+        try {
+            await axios.delete(`http://localhost:5001/api/inventory/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+            fetchDashboardData();
+            toast.success('Đã xóa lô hàng!');
+        } catch (error) {
+            toast.error('Lỗi xóa lô hàng');
+        }
+    };
+
+    const handleDonationStatusUpdate = async (id, status) => {
+        try {
+            await axios.put(`http://localhost:5001/api/donations/${id}/status`, { status }, { headers: { Authorization: `Bearer ${token}` } });
+            fetchDashboardData();
+            toast.success('Cập nhật trạng thái quyên góp!');
+        } catch (error) {
+            toast.error('Lỗi cập nhật trạng thái');
+        }
+    };
+
     const exportToExcel = (data, fileName) => {
         const worksheet = XLSX.utils.json_to_sheet(data);
         const workbook = XLSX.utils.book_new();
@@ -148,6 +217,7 @@ const Admin = () => {
                 <div className="admin-logo">Admin Panel</div>
                 <nav className="admin-nav">
                     <button className={`admin-nav-link ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => setActiveTab('dashboard')}>Tổng Quan</button>
+                    <button className={`admin-nav-link ${activeTab === 'users' ? 'active' : ''}`} onClick={() => setActiveTab('users')}>Người Dùng</button>
                     <button className={`admin-nav-link ${activeTab === 'campaigns' ? 'active' : ''}`} onClick={() => setActiveTab('campaigns')}>Chiến Dịch</button>
                     <button className={`admin-nav-link ${activeTab === 'donations' ? 'active' : ''}`} onClick={() => setActiveTab('donations')}>Quyên Góp</button>
                     <button className={`admin-nav-link ${activeTab === 'requests' ? 'active' : ''}`} onClick={() => setActiveTab('requests')}>Người Yêu Cầu</button>
@@ -162,6 +232,7 @@ const Admin = () => {
                 <header className="admin-header">
                     <h2>
                         {activeTab === 'dashboard' && 'Tổng Quan Hệ Thống'}
+                        {activeTab === 'users' && 'Quản Lý Người Dùng'}
                         {activeTab === 'campaigns' && 'Quản Lý Chiến Dịch'}
                         {activeTab === 'donations' && 'Danh Sách Quyên Góp'}
                         {activeTab === 'requests' && 'Yêu Cầu Cứu Trợ'}
@@ -225,6 +296,52 @@ const Admin = () => {
                         </div>
                     )}
 
+                    {activeTab === 'users' && (
+                        <div>
+                            <form onSubmit={handleUserSubmit} className="card" style={{ padding: '20px', marginBottom: '30px', backgroundColor: '#fff', borderRadius: '8px' }}>
+                                <h3>Thêm Người Dùng</h3>
+                                <div style={{ display: 'flex', gap: '15px', marginBottom: '15px', marginTop: '15px' }}>
+                                    <input type="text" placeholder="Tên đăng nhập" required style={{ flex: 1, padding: '10px', borderRadius: '4px', border: '1px solid #ccc' }} value={userForm.username} onChange={e => setUserForm({ ...userForm, username: e.target.value })} />
+                                    <input type="password" placeholder="Mật khẩu" required style={{ flex: 1, padding: '10px', borderRadius: '4px', border: '1px solid #ccc' }} value={userForm.password} onChange={e => setUserForm({ ...userForm, password: e.target.value })} />
+                                    <select style={{ flex: 1, padding: '10px', borderRadius: '4px', border: '1px solid #ccc' }} value={userForm.role} onChange={e => setUserForm({ ...userForm, role: e.target.value })}>
+                                        <option value="user">User</option>
+                                        <option value="volunteer">Volunteer</option>
+                                        <option value="admin">Admin</option>
+                                    </select>
+                                </div>
+                                <button type="submit" className="btn btn-primary" style={{ padding: '10px 20px', fontSize: '16px' }}>Tạo Người Dùng</button>
+                            </form>
+                            <table className="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Username</th>
+                                        <th>Quyền (Role)</th>
+                                        <th>Thao Tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {users.map(u => (
+                                        <tr key={u.id}>
+                                            <td>{u.id}</td>
+                                            <td>{u.username}</td>
+                                            <td>
+                                                <select value={u.role} onChange={(e) => handleRoleChange(u.id, e.target.value)} style={{ padding: '5px' }}>
+                                                    <option value="user">User</option>
+                                                    <option value="volunteer">Volunteer</option>
+                                                    <option value="admin">Admin</option>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <button className="btn btn-sm btn-outline" style={{ color: 'red', borderColor: 'red' }} onClick={() => handleDeleteUser(u.id)}>Xóa</button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+
                     {activeTab === 'campaigns' && (
                         <div>
                             <table className="admin-table">
@@ -235,6 +352,7 @@ const Admin = () => {
                                         <th>Mục Tiêu</th>
                                         <th>Hiện Tại</th>
                                         <th>Trạng Thái</th>
+                                        <th>Thao Tác</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -245,6 +363,9 @@ const Admin = () => {
                                             <td>{c.target.toLocaleString()} VNĐ</td>
                                             <td>{c.current.toLocaleString()} VNĐ</td>
                                             <td><span className={`status-badge ${c.status.toLowerCase()}`}>{c.status}</span></td>
+                                            <td>
+                                                <button className="btn btn-sm btn-outline" style={{ color: 'red', borderColor: 'red' }} onClick={() => handleDeleteCampaign(c.id)}>Xóa</button>
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -317,6 +438,7 @@ const Admin = () => {
                                         <th>Số Lượng</th>
                                         <th>Đơn Vị</th>
                                         <th>Tọa Độ</th>
+                                        <th>Thao Tác</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -327,6 +449,9 @@ const Admin = () => {
                                             <td>{i.quantity.toLocaleString()}</td>
                                             <td>{i.unit}</td>
                                             <td>{i.lat && i.lng ? `${i.lat}, ${i.lng}` : 'Chưa đặt'}</td>
+                                            <td>
+                                                <button className="btn btn-sm btn-outline" style={{ color: 'red', borderColor: 'red' }} onClick={() => handleDeleteInventory(i.id)}>Xóa</button>
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -417,8 +542,24 @@ const Admin = () => {
                                 <button className="btn btn-outline btn-sm" style={{ marginRight: '10px' }} onClick={() => exportToExcel(donations.map(d => ({ id: d.id, donorName: d.donorName, amount: d.amount, campaign: d.Campaign?.title })), 'QuyenGop')}>Xuất Excel</button>
                             </div>
                             <table className="admin-table">
-                                <thead><tr><th>ID</th><th>Người Ủng Hộ</th><th>Số Tiền</th><th>Chiến Dịch</th></tr></thead>
-                                <tbody>{donations.map(d => <tr key={d.id}><td>{d.id}</td><td>{d.donorName}</td><td>{d.amount.toLocaleString()}</td><td>{d.Campaign?.title}</td></tr>)}</tbody>
+                                <thead><tr><th>ID</th><th>Người Ủng Hộ</th><th>Số Tiền</th><th>Chiến Dịch</th><th>Trạng Thái</th><th>Thao Tác</th></tr></thead>
+                                <tbody>
+                                    {donations.map(d => (
+                                        <tr key={d.id}>
+                                            <td>{d.id}</td>
+                                            <td>{d.donorName}</td>
+                                            <td>{d.amount.toLocaleString()}</td>
+                                            <td>{d.Campaign?.title}</td>
+                                            <td><span className={`status-badge ${(d.status || 'pending').toLowerCase()}`}>{d.status || 'pending'}</span></td>
+                                            <td>
+                                                <select value={d.status || 'pending'} onChange={(e) => handleDonationStatusUpdate(d.id, e.target.value)} style={{ padding: '5px' }}>
+                                                    <option value="pending">Pending</option>
+                                                    <option value="completed">Completed</option>
+                                                </select>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
                             </table>
                         </div>
                     )}

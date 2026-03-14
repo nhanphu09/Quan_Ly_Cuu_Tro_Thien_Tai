@@ -20,8 +20,8 @@ const Home = () => {
                     <h1 style={{ color: '#fff' }}>{t('home.title')}</h1>
                     <p>{t('home.subtitle')}</p>
                     <div className="hero-actions" style={{ marginTop: '2rem' }}>
-                        <Link to="/donate" className="btn btn-primary" style={{ backgroundColor: '#fff', color: 'var(--primary-color)' }}>{t('home.donate_now')}</Link>
-                        <Link to="/volunteer" className="btn btn-secondary" style={{ borderColor: '#fff', color: '#fff' }}>{t('home.register_volunteer')}</Link>
+                        <Link to="/donate" className="btn btn-primary">{t('home.donate_now')}</Link>
+                        <Link to="/volunteer" className="btn btn-secondary">{t('home.register_volunteer')}</Link>
                     </div>
                 </div>
             </section>
